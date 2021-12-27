@@ -13,4 +13,42 @@
 * @license   Commercial
 *}
 
-<div id="snow"></div>
+<style>
+    .snowflake {
+        color: {$THSNOW_FLAKE_COLOR|escape:'html':'UTF-8'};
+        text-shadow: 0 0 1px {$THSNOW_FLAKE_COLOR|escape:'html':'UTF-8'};
+    }
+</style>
+
+<div class="snowflakes" aria-hidden="true">
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+    <div class="snowflake">
+        ❅
+    </div>
+</div>

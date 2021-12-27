@@ -14,7 +14,6 @@
  * @license   Commercial
  */
 
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -62,6 +61,7 @@ class Thsnow extends Module
     {
 
         Configuration::updateValue('THSNOW_LIVE_MODE', false);
+        Configuration::updateValue('THSNOW_FLAKE_COLOR', '#FFFFFF');
 
         return true;
     }
@@ -69,7 +69,8 @@ class Thsnow extends Module
     public function registerHooks()
     {
         if (!$this->registerHook('header') ||
-            !$this->registerHook('actionFrontControllerSetMedia')) {
+            !$this->registerHook('actionFrontControllerSetMedia') ||
+            !$this->registerHook('actionAdminControllerSetMedia')) {
             return false;
         }
 
@@ -171,6 +172,29 @@ class Thsnow extends Module
                             )
                         ),
                     ),
+                    array(
+                        'type' => 'th_title',
+                        'name' => 'Effect Customization'
+                    ),
+                    array(
+                        'type' => 'color',
+                        'label' => 'Flake color:',
+                        'name' => 'THSNOW_FLAKE_COLOR'
+                    ),
+                    array(
+                        'type' => 'th_title',
+                        'name' => 'Schedule the Snowing Effect'
+                    ),
+                    array(
+                        'type' => 'datetime',
+                        'label' => $this->l('Date From:'),
+                        'name' => 'THSNOW_DATE_FROM',
+                    ),
+                    array(
+                        'type' => 'datetime',
+                        'label' => $this->l('Date To:'),
+                        'name' => 'THSNOW_DATE_TO',
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -186,6 +210,9 @@ class Thsnow extends Module
     {
         return array(
             'THSNOW_LIVE_MODE' => Tools::getValue('THSNOW_LIVE_MODE', Configuration::get('THSNOW_LIVE_MODE')),
+            'THSNOW_FLAKE_COLOR' => Tools::getValue('THSNOW_FLAKE_COLOR', Configuration::get('THSNOW_FLAKE_COLOR')),
+            'THSNOW_DATE_FROM' => Tools::getValue('THSNOW_DATE_FROM', Configuration::get('THSNOW_DATE_FROM')),
+            'THSNOW_DATE_TO' => Tools::getValue('THSNOW_DATE_TO', Configuration::get('THSNOW_DATE_TO')),
         );
     }
 
@@ -194,10 +221,36 @@ class Thsnow extends Module
      */
     protected function postProcess()
     {
+        if (Tools::getValue('THSNOW_DATE_FROM') && Tools::getValue('THSNOW_DATE_TO') &&
+            Tools::getValue('THSNOW_DATE_FROM') > Tools::getValue('THSNOW_DATE_TO')) {
+            $this->_errors[] = $this->l('The end date cannot be lower then start date!');
+            return false;
+        }
+
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+            $update_value = 1;
+
+            if ($key == 'THSNOW_FLAKE_COLOR') {
+                if (!Tools::getValue($key) || !preg_match('/^#[0-9A-F]{6}$/i', Tools::getValue($key))) {
+                    $this->_errors[] = 'Flake color value it\'s not ok!';
+                    $update_value = 0;
+                }
+            }
+
+            if ($update_value) {
+                Configuration::updateValue($key, Tools::getValue($key));
+            }
+        }
+
+        return true;
+    }
+
+    public function hookActionAdminControllerSetMedia()
+    {
+        if (Tools::getValue('configure') == $this->name) {
+            $this->context->controller->addCSS($this->_path.'views/css/back.css');
         }
     }
 
@@ -206,12 +259,33 @@ class Thsnow extends Module
      */
     public function hookActionFrontControllerSetMedia()
     {
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+        $current_date = date('Y-m-d H:i:s');
+        if (!Configuration::get('THSNOW_LIVE_MODE') ||
+            (Configuration::get('THSNOW_DATE_FROM') &&
+                Configuration::get('THSNOW_DATE_TO') &&
+                ($current_date < Configuration::get('THSNOW_DATE_FROM') || $current_date > Configuration::get('THSNOW_DATE_TO')))) {
+            return false;
+        }
+
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+
+        return true;
     }
 
     public function hookHeader()
     {
+        $current_date = date('Y-m-d H:i:s');
+        if (!Configuration::get('THSNOW_LIVE_MODE') ||
+            (Configuration::get('THSNOW_DATE_FROM') &&
+                Configuration::get('THSNOW_DATE_TO') &&
+                ($current_date < Configuration::get('THSNOW_DATE_FROM') || $current_date > Configuration::get('THSNOW_DATE_TO')))) {
+            return false;
+        }
+
+        $this->context->smarty->assign(array(
+            'THSNOW_FLAKE_COLOR' => Configuration::get('THSNOW_FLAKE_COLOR')
+        ));
+
         return $this->context->smarty->fetch(_PS_MODULE_DIR_.$this->name.'/views/templates/front/snow.tpl');
     }
 }
