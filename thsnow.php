@@ -26,7 +26,7 @@ class Thsnow extends Module
     {
         $this->name = 'thsnow';
         $this->tab = 'administration';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'Thecon';
         $this->need_instance = 0;
 
@@ -59,9 +59,17 @@ class Thsnow extends Module
 
     private function installDemo()
     {
-
         Configuration::updateValue('THSNOW_LIVE_MODE', false);
-        Configuration::updateValue('THSNOW_FLAKE_COLOR', '#FFFFFF');
+        Configuration::updateValue('THSNOW_FLAKE_ROTATION', true);
+        Configuration::updateValue('THSNOW_FLAKE_WIND', true);
+        Configuration::updateValue('THSNOW_FLAKE_COUNT', 50);
+        Configuration::updateValue('THSNOW_FLAKE_COLOR', '#5ECDEF');
+        Configuration::updateValue('THSNOW_FLAKE_MIN_OPACITY', 0.1);
+        Configuration::updateValue('THSNOW_FLAKE_MAX_OPACITY', 0.95);
+        Configuration::updateValue('THSNOW_FLAKE_MIN_SIZE', 2);
+        Configuration::updateValue('THSNOW_FLAKE_MAX_SIZE', 5);
+        Configuration::updateValue('THSNOW_FLAKE_ZINDEX', 9999);
+        Configuration::updateValue('THSNOW_FLAKE_SPEED', 2);
 
         return true;
     }
@@ -174,15 +182,6 @@ class Thsnow extends Module
                     ),
                     array(
                         'type' => 'th_title',
-                        'name' => 'Effect Customization'
-                    ),
-                    array(
-                        'type' => 'color',
-                        'label' => 'Flake color:',
-                        'name' => 'THSNOW_FLAKE_COLOR'
-                    ),
-                    array(
-                        'type' => 'th_title',
                         'name' => 'Schedule the Snowing Effect'
                     ),
                     array(
@@ -194,6 +193,103 @@ class Thsnow extends Module
                         'type' => 'datetime',
                         'label' => $this->l('Date To:'),
                         'name' => 'THSNOW_DATE_TO',
+                    ),
+                    array(
+                        'type' => 'th_title',
+                        'name' => 'Flakes Customization'
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Rotation'),
+                        'name' => 'THSNOW_FLAKE_ROTATION',
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => true,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => false,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('Wind'),
+                        'name' => 'THSNOW_FLAKE_WIND',
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => true,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => false,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                    array(
+                        'type' => 'color',
+                        'label' => 'Color:',
+                        'name' => 'THSNOW_FLAKE_COLOR',
+                        'desc' => 'Default value: #5ECDEF'
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Count:',
+                        'name' => 'THSNOW_FLAKE_COUNT',
+                        'desc' => 'Default value: 50',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Min opacity:',
+                        'name' => 'THSNOW_FLAKE_MIN_OPACITY',
+                        'desc' => 'Default value: 0.1. From 0.1 to 1',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Max opacity:',
+                        'name' => 'THSNOW_FLAKE_MAX_OPACITY',
+                        'desc' => 'Default value: 1. From 0.1 to 1',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Min size:',
+                        'name' => 'THSNOW_FLAKE_MIN_SIZE',
+                        'desc' => 'Default value: 2',
+                        'suffix' => 'px',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Max size:',
+                        'name' => 'THSNOW_FLAKE_MAX_SIZE',
+                        'desc' => 'Default value: 5',
+                        'suffix' => 'px',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'Speed',
+                        'name' => 'THSNOW_FLAKE_SPEED',
+                        'desc' => 'Default value: 2',
+                        'col' => 3
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => 'zIndex',
+                        'name' => 'THSNOW_FLAKE_ZINDEX',
+                        'desc' => 'Default value: 9999',
+                        'col' => 3
                     ),
                 ),
                 'submit' => array(
@@ -213,6 +309,15 @@ class Thsnow extends Module
             'THSNOW_FLAKE_COLOR' => Tools::getValue('THSNOW_FLAKE_COLOR', Configuration::get('THSNOW_FLAKE_COLOR')),
             'THSNOW_DATE_FROM' => Tools::getValue('THSNOW_DATE_FROM', Configuration::get('THSNOW_DATE_FROM')),
             'THSNOW_DATE_TO' => Tools::getValue('THSNOW_DATE_TO', Configuration::get('THSNOW_DATE_TO')),
+            'THSNOW_FLAKE_ROTATION' => Tools::getValue('THSNOW_FLAKE_ROTATION', Configuration::get('THSNOW_FLAKE_ROTATION')),
+            'THSNOW_FLAKE_WIND' => Tools::getValue('THSNOW_FLAKE_WIND', Configuration::get('THSNOW_FLAKE_WIND')),
+            'THSNOW_FLAKE_COUNT' => Tools::getValue('THSNOW_FLAKE_COUNT', Configuration::get('THSNOW_FLAKE_COUNT')),
+            'THSNOW_FLAKE_MIN_OPACITY' => Tools::getValue('THSNOW_FLAKE_MIN_OPACITY', Configuration::get('THSNOW_FLAKE_MIN_OPACITY')),
+            'THSNOW_FLAKE_MAX_OPACITY' => Tools::getValue('THSNOW_FLAKE_MAX_OPACITY', Configuration::get('THSNOW_FLAKE_MAX_OPACITY')),
+            'THSNOW_FLAKE_MIN_SIZE' => Tools::getValue('THSNOW_FLAKE_MIN_SIZE', Configuration::get('THSNOW_FLAKE_MIN_SIZE')),
+            'THSNOW_FLAKE_MAX_SIZE' => Tools::getValue('THSNOW_FLAKE_MAX_SIZE', Configuration::get('THSNOW_FLAKE_MAX_SIZE')),
+            'THSNOW_FLAKE_SPEED' => Tools::getValue('THSNOW_FLAKE_SPEED', Configuration::get('THSNOW_FLAKE_SPEED')),
+            'THSNOW_FLAKE_ZINDEX' => Tools::getValue('THSNOW_FLAKE_ZINDEX', Configuration::get('THSNOW_FLAKE_ZINDEX')),
         );
     }
 
@@ -230,18 +335,7 @@ class Thsnow extends Module
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            $update_value = 1;
-
-            if ($key == 'THSNOW_FLAKE_COLOR') {
-                if (!Tools::getValue($key) || !preg_match('/^#[0-9A-F]{6}$/i', Tools::getValue($key))) {
-                    $this->_errors[] = 'Flake color value it\'s not ok!';
-                    $update_value = 0;
-                }
-            }
-
-            if ($update_value) {
-                Configuration::updateValue($key, Tools::getValue($key));
-            }
+            Configuration::updateValue($key, Tools::getValue($key));
         }
 
         return true;
@@ -259,20 +353,66 @@ class Thsnow extends Module
      */
     public function hookActionFrontControllerSetMedia()
     {
-        $current_date = date('Y-m-d H:i:s');
-        if (!Configuration::get('THSNOW_LIVE_MODE') ||
-            (Configuration::get('THSNOW_DATE_FROM') &&
-                Configuration::get('THSNOW_DATE_TO') &&
-                ($current_date < Configuration::get('THSNOW_DATE_FROM') || $current_date > Configuration::get('THSNOW_DATE_TO')))) {
+        if (!$this->isVisible()) {
             return false;
         }
 
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+        $this->context->controller->addJS($this->_path.'/views/js/snowflakes.min.js');
+        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+
+        $prop = array();
+        if ($temp = Configuration::get('THSNOW_FLAKE_ZINDEX')) {
+            $prop['zIndex'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_COLOR')) {
+            $prop['color'] = $temp;
+        }
+
+        $prop['wind'] = Configuration::get('THSNOW_FLAKE_WIND');
+        $prop['rotation'] = Configuration::get('THSNOW_FLAKE_ROTATION');
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_COUNT')) {
+            $prop['count'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_MIN_OPACITY')) {
+            $prop['minOpacity'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_MAX_OPACITY')) {
+            $prop['maxOpacity'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_MIN_SIZE')) {
+            $prop['minSize'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_MAX_SIZE')) {
+            $prop['maxSize'] = $temp;
+        }
+
+        if ($temp = Configuration::get('THSNOW_FLAKE_SPEED')) {
+            $prop['speed'] = $temp;
+        }
+
+        Media::addJsDef(array(
+            'THSNOW_FLAKE_PROP' => $prop,
+        ));
 
         return true;
     }
 
     public function hookHeader()
+    {
+        if (!$this->isVisible()) {
+            return false;
+        }
+
+        return $this->context->smarty->fetch(_PS_MODULE_DIR_.$this->name.'/views/templates/front/snow.tpl');
+    }
+
+    public function isVisible()
     {
         $current_date = date('Y-m-d H:i:s');
         if (!Configuration::get('THSNOW_LIVE_MODE') ||
@@ -282,10 +422,6 @@ class Thsnow extends Module
             return false;
         }
 
-        $this->context->smarty->assign(array(
-            'THSNOW_FLAKE_COLOR' => Configuration::get('THSNOW_FLAKE_COLOR')
-        ));
-
-        return $this->context->smarty->fetch(_PS_MODULE_DIR_.$this->name.'/views/templates/front/snow.tpl');
+        return true;
     }
 }

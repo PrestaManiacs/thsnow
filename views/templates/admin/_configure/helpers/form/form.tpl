@@ -1,5 +1,5 @@
 {*
-* 2006-2021 THECON SRL
+* 2006-2022 THECON SRL
 *
 * NOTICE OF LICENSE
 *
@@ -9,7 +9,7 @@
 * USED BY THIS MODULE.
 *
 * @author    THECON SRL <contact@thecon.ro>
-* @copyright 2006-2021 THECON SRL
+* @copyright 2006-2022 THECON SRL
 * @license   Commercial
 *}
 
